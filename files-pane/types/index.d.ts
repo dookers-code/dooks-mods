@@ -9,6 +9,7 @@ declare module 'claude-code' {
       previewDiff: boolean
       expandAll: boolean
       snapshot: Record<string, string>
+      head: string
       touched: Touch[]
       current: Current
       query: string

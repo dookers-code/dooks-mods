@@ -17,6 +17,7 @@ const changesA = atom({ plugin: 'files-pane', key: 'changes' } as const, 0)
 const previewA = atom({ plugin: 'files-pane', key: 'preview' } as const, '')
 const diffA = atom({ plugin: 'files-pane', key: 'previewDiff' } as const, true)
 const expandA = atom({ plugin: 'files-pane', key: 'expandAll' } as const, false)
+const headA = atom({ plugin: 'files-pane', key: 'head' } as const, '')
 const snapA = atom({ plugin: 'files-pane', key: 'snapshot' } as const, {} as Record<string, string>)
 const tickA = atom({ plugin: 'files-pane', key: 'tick' } as const, 0)
 
@@ -55,13 +56,36 @@ async function refreshGit($: any) {
   const out = await $.process.run(['git', 'status', '--porcelain', '-b'], { cwd, timeoutMs: 5000 })
   if (out.exitCode !== 0) return
   const lines = String(out.stdout).split('\n').filter(Boolean)
-  const head = (lines.shift() ?? '').replace(/^## /, '').split('...')[0]
-  const stale = head !== (await read($, branchA)) || lines.length !== (await read($, changesA))
+  const branchName = (lines.shift() ?? '').replace(/^## /, '').split('...')[0]
+  const stale = branchName !== (await read($, branchA)) || lines.length !== (await read($, changesA))
   if (stale) {
-    await update($, branchA, () => head)
+    await update($, branchA, () => branchName)
     await update($, changesA, () => lines.length)
-    $.ui.invalidate('ui.render')
   }
+
+  // A new commit (including a pull or checkout) starts the "Claude touched" list over;
+  // a file whose changes are gone (reverted, stashed) drops out of it.
+  const rev = await $.process.run(['git', 'rev-parse', 'HEAD'], { cwd, timeoutMs: 5000 })
+  const headSha = rev.exitCode === 0 ? String(rev.stdout).trim() : ''
+  const lastSha = await read($, headA)
+  const dirty = new Set(lines.map(l => `${cwd}/${l.slice(3).split(' -> ').pop()}`))
+  let cleared = false
+  if (headSha && headSha !== lastSha) {
+    await update($, headA, () => headSha)
+    if (lastSha) {
+      await update($, touchedA, () => [])
+      cleared = true
+    }
+  }
+  if (!cleared) {
+    const touched = await read($, touchedA)
+    const kept = touched.filter(t => t.kind === 'read' || dirty.has(t.path))
+    if (kept.length !== touched.length) {
+      await update($, touchedA, () => kept)
+      cleared = true
+    }
+  }
+  if (stale || cleared) $.ui.invalidate('ui.render')
 }
 
 async function snapshot($: any): Promise<Record<string, string>> {
