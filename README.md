@@ -11,7 +11,7 @@ Personal Claude Code mods.
 In a terminal Claude Code session:
 
 ```
-/plugin install files-pane --marketplace jfuqua390/dooks-mods
+/plugin install files-pane --marketplace dookers-code/dooks-mods
 ```
 
 Answer `y` to add the marketplace, then pick the user scope.
