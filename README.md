@@ -23,3 +23,7 @@ Make a folder for it beside `files-pane/` and add an entry to the `plugins` arra
 ```json
 { "name": "my-mod", "source": "./my-mod" }
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE). Third-party logos in `files-pane` are not covered by it.

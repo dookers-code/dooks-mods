@@ -65,4 +65,4 @@ claude plugin validate ./files-pane
 
 ## Icons and licensing
 
-File-type icons are inline SVGs (Vue, TypeScript, PHP, Docker, Pest and others). Check each logo's license and trademark terms before publishing the repo publicly or redistributing it. No license has been chosen for this repository yet.
+File-type icons are inline SVGs (Vue, TypeScript, PHP, Docker, Pest and others). The code is MIT licensed (see [LICENSE](../LICENSE)). The MIT license covers the code only: the logos are third-party marks, so check each one's license and trademark terms before redistributing them.
