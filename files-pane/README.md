@@ -14,7 +14,7 @@ Open it with `/files`.
 In a terminal Claude Code session:
 
 ```
-/plugin install files-pane --marketplace <owner>/dooks-mods
+/plugin install files-pane --marketplace jfuqua390/dooks-mods
 ```
 
 Answer `y` to add the marketplace, then pick the user scope. It also loads in the desktop app's Code tab.
