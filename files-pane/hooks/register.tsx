@@ -110,7 +110,7 @@ async function snapshot($: any): Promise<Record<string, string>> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await update($, cwdA, () => e.cwd)
-    await $.command.register({ name: 'file-pane', description: 'Show the files pane' })
+    await $.command.register({ name: 'file-pane', description: 'Toggle the files pane' })
     await refreshGit($)
     const first = await snapshot($)
     await update($, snapA, () => first)
@@ -121,6 +121,12 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'file-pane' }, async $ => {
+    const isUp = (await $.ui.panes()).some(p => p.id === PANE)
+    if (isUp) {
+      await $.ui.close({ id: PANE })
+
+      return { text: 'Files pane closed.' }
+    }
     await $.ui.open({ id: PANE, title: 'Files' })
 
     return { text: 'Files pane opened.' }

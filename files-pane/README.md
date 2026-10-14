@@ -22,11 +22,13 @@ Answer `y` to add the marketplace, then choose the user scope.
 
 ## Use
 
-Open the pane with:
+Toggle the pane with:
 
 ```
 /file-pane
 ```
+
+It opens the pane if it is closed and closes it if it is open. The pane also opens on its own at session start (the terminal only draws it from 144 columns wide).
 
 - **Status card**: what Claude is reading or editing right now, the branch, and the uncommitted count.
 - **Claude touched**: files Claude read (Opened) or changed (Edited). Click a name to preview it.
