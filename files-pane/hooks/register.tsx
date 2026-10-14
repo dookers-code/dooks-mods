@@ -110,7 +110,7 @@ async function snapshot($: any): Promise<Record<string, string>> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await update($, cwdA, () => e.cwd)
-    await $.command.register({ name: 'dooks-mods:file-pane', description: 'Show the files pane' })
+    await $.command.register({ name: 'dooks-mods-file-pane', description: 'Show the files pane' })
     await refreshGit($)
     const first = await snapshot($)
     await update($, snapA, () => first)
@@ -120,7 +120,7 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('command.run', { command: 'dooks-mods:file-pane' }, async $ => {
+  on('command.run', { command: 'dooks-mods-file-pane' }, async $ => {
     await $.ui.open({ id: PANE, title: 'Files' })
 
     return { text: 'Files pane opened.' }
