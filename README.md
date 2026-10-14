@@ -14,7 +14,7 @@ In a terminal Claude Code session:
 /plugin install files-pane --marketplace dookers-code/dooks-mods
 ```
 
-Answer `y` to add the marketplace, then pick the user scope. Open the pane with `/dooks-mods-file-pane`. See [files-pane](files-pane) for requirements, limits and updating.
+Answer `y` to add the marketplace, then pick the user scope. Open the pane with `/file-pane`. See [files-pane](files-pane) for requirements, limits and updating.
 
 ## Adding a mod
 

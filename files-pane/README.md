@@ -25,7 +25,7 @@ Answer `y` to add the marketplace, then choose the user scope.
 Open the pane with:
 
 ```
-/dooks-mods-file-pane
+/file-pane
 ```
 
 - **Status card**: what Claude is reading or editing right now, the branch, and the uncommitted count.
