@@ -8,6 +8,9 @@ const hiddenA = atom({ plugin: 'usage-bar', key: 'isHidden' } as const, false)
 const tickA = atom({ plugin: 'usage-bar', key: 'tick' } as const, 0)
 
 const ORANGE = '#FF8200'
+// The theme's text color: white on a dark theme, dark on a light one.
+const BAR = 'text'
+const DETAIL = '#B4B4B4'
 const LABELS: Record<string, string> = { five_hour: 'Session', seven_day: 'Weekly', spend_limit: 'Spend' }
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WIDTH = 10
@@ -88,13 +91,24 @@ export const register: Register = on => {
     const now = new Date(await $.clock.now())
 
     return (
-      <Box flexDirection="row" flexWrap="wrap">
-        {limits.map((l, i) => (
+      <Box flexDirection="column">
+        {limits.map(l => (
+          // Fixed columns keep the rows aligned; only the reset details wrap, inside their own column.
           <Box key={l.kind} flexDirection="row">
-            {i > 0 ? <Text color={ORANGE}>{'   ·   '}</Text> : null}
-            <Text color={ORANGE} bold>{LABELS[l.kind] ?? l.kind} </Text>
-            <Text color={ORANGE}>{bar(l.percentUsed)} {Math.round(l.percentUsed)}%</Text>
-            <Text color={ORANGE} dimColor>{l.resetsAt ? `  ${left(l.resetsAt, now)} · ${resets(l.resetsAt, now)}` : ''}</Text>
+            <Box width={9} flexShrink={0}>
+              <Text color={ORANGE} bold>{LABELS[l.kind] ?? l.kind}</Text>
+            </Box>
+            <Box flexShrink={0}>
+              <Text color={BAR}>{bar(l.percentUsed)}</Text>
+            </Box>
+            <Box width={6} flexShrink={0}>
+              <Text color={ORANGE} bold>{` ${Math.round(l.percentUsed)}%`}</Text>
+            </Box>
+            {l.resetsAt ? (
+              <Box flexShrink={1}>
+                <Text color={DETAIL} wrap="wrap">{`${left(l.resetsAt, now)} · ${resets(l.resetsAt, now)}`}</Text>
+              </Box>
+            ) : null}
           </Box>
         ))}
       </Box>

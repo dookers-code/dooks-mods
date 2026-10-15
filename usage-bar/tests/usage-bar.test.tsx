@@ -50,6 +50,11 @@ for (const surface of ['terminal', 'desktop'] as const) {
     expect((await ui.find({ text: '4d 2h left' }))).toBeDefined()
     expect((await ui.find({ text: '24%' }))).toBeDefined()
     expect((await ui.find({ text: '41%' }))).toBeDefined()
+    // One row per window, no separator between them; white bar, gray details.
+    const drawn = JSON.stringify(await ui.drawn())
+    expect(drawn).not.toContain('   ·   ')
+    expect(drawn).toContain('"color":"text"')
+    expect(drawn).toContain('"color":"#B4B4B4"')
 
     await $.session.measure({ context: { window: 200000 } as never, rateLimits: [], changed: ['rateLimits'] })
     await ui.redraw()

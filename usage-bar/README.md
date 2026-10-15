@@ -1,9 +1,10 @@
 # usage-bar
 
-Shows your 5-hour session and weekly usage limits in a band above the prompt, in `#FF8200`, with the time left until each resets:
+Shows your 5-hour session and weekly usage limits in a band above the prompt, one row each: the label and percentage in `#FF8200`, the meter in your theme's text color, and the time left until reset in light gray:
 
 ```
-Session ██░░░░░░░░ 24%  2h 13m left · resets 3:40 PM   ·   Weekly ████░░░░░░ 41%  3d 12h left · resets Mon 4:00 AM
+Session  ██░░░░░░░░  24% 2h 13m left · resets 3:40 PM
+Weekly   ████░░░░░░  41% 3d 12h left · resets Mon 4:00 AM
 ```
 
 ## Install
