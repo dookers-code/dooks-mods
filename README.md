@@ -5,6 +5,7 @@ Personal Claude Code mods.
 | Mod | What it does |
 | --- | --- |
 | [files-pane](files-pane) | Files pane with a status card, Claude-touched list, git changes with diffs, and a file tree |
+| [usage-bar](usage-bar) | 5-hour and weekly usage limits in an orange band above the prompt |
 
 ## Install
 

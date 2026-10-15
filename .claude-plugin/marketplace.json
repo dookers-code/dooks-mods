@@ -2,5 +2,8 @@
   "name": "dooks-mods",
   "description": "Personal Claude Code mods",
   "owner": { "name": "Jonathan Fuqua" },
-  "plugins": [{ "name": "files-pane", "source": "./files-pane" }]
+  "plugins": [
+    { "name": "files-pane", "source": "./files-pane" },
+    { "name": "usage-bar", "source": "./usage-bar" }
+  ]
 }
