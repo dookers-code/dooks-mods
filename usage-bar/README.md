@@ -1,6 +1,10 @@
 # usage-bar
 
-Shows your 5-hour session and weekly usage limits in a band above the prompt, one row each: the label and percentage in `#FF8200`, the meter in your theme's text color, and the time left until reset in light gray:
+Shows your 5-hour session and weekly usage limits in a band above the prompt, one row each: the label and percentage in `#FF8200`, a white meter, and the time left until reset in light gray.
+
+![usage-bar in the Claude desktop app](screenshot.png)
+
+In a terminal the meter is drawn with text:
 
 ```
 Session  ██░░░░░░░░  24% 2h 13m left · resets 3:40 PM
@@ -31,4 +35,3 @@ Run `/usage-bar` to hide or show the band. The choice is remembered across sessi
 - Only shows on a Claude subscription. API-key sessions report no rate limits, so the band stays hidden.
 - Mods can't draw in the desktop app's sidebar, so the band sits above the prompt instead.
 - The time left counts down once a minute.
-- On the desktop app the meter is drawn as a fixed-width bar so both rows line up; the terminal uses the text meter shown above.
