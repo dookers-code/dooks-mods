@@ -1,5 +1,5 @@
 import { atom, read, update } from 'claude-code'
-import type { Register } from 'claude-code'
+import type { Elements, Register } from 'claude-code'
 
 import type { Limit } from '../types'
 
@@ -18,6 +18,18 @@ const WIDTH = 10
 export const bar = (pct: number) => {
   const filled = Math.max(0, Math.min(WIDTH, Math.round((pct / 100) * WIDTH)))
   return '█'.repeat(filled) + '░'.repeat(WIDTH - filled)
+}
+
+const METER_W = 100
+const METER_H = 12
+
+// A white fill on a gray track, the same width at any percentage.
+export const meterSvg = (pct: number) => {
+  const fill = Math.max(0, Math.min(METER_W, Math.round((pct / 100) * METER_W)))
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${METER_W}" height="${METER_H}" viewBox="0 0 ${METER_W} ${METER_H}">`
+    + `<rect width="${METER_W}" height="${METER_H}" rx="3" fill="#808080" fill-opacity="0.35"/>`
+    + (fill ? `<rect width="${fill}" height="${METER_H}" rx="3" fill="#FFFFFF"/>` : '')
+    + '</svg>'
 }
 
 const clock = (d: Date) => {
@@ -84,7 +96,10 @@ export const register: Register = on => {
     if (!limits.length) limits = pick((await $.session.usage()).rateLimits)
     if (e.props.hasSurvey || isHidden) return next(e)
 
-    const { Box, Text } = $.ui.resolve(e)
+    const elements = $.ui.resolve(e)
+    const { Box, Text } = elements
+    // The desktop font is proportional, so █ and ░ differ in width; draw a fixed-size meter there.
+    const Svg = e.surface === 'desktop' ? (elements as Elements['desktop']).Svg : null
     if (!limits.length) {
       return <Text color={ORANGE} dimColor>Usage: waiting for the first reply</Text>
     }
@@ -98,8 +113,12 @@ export const register: Register = on => {
             <Box width={9} flexShrink={0}>
               <Text color={ORANGE} bold>{LABELS[l.kind] ?? l.kind}</Text>
             </Box>
-            <Box flexShrink={0}>
-              <Text color={BAR}>{bar(l.percentUsed)}</Text>
+            <Box flexShrink={0} alignItems="center">
+              {Svg ? (
+                <Svg source={meterSvg(l.percentUsed)} alt={`${Math.round(l.percentUsed)}% used`} width={METER_W} height={METER_H} />
+              ) : (
+                <Text color={BAR}>{bar(l.percentUsed)}</Text>
+              )}
             </Box>
             <Box width={6} flexShrink={0}>
               <Text color={ORANGE} bold>{` ${Math.round(l.percentUsed)}%`}</Text>

@@ -31,3 +31,4 @@ Run `/usage-bar` to hide or show the band. The choice is remembered across sessi
 - Only shows on a Claude subscription. API-key sessions report no rate limits, so the band stays hidden.
 - Mods can't draw in the desktop app's sidebar, so the band sits above the prompt instead.
 - The time left counts down once a minute.
+- On the desktop app the meter is drawn as a fixed-width bar so both rows line up; the terminal uses the text meter shown above.

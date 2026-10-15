@@ -1,6 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 
-import { bar, left, resets } from '../hooks/register'
+import { bar, left, meterSvg, resets } from '../hooks/register'
 
 const PROPS = {
   hasSurvey: false,
@@ -29,6 +29,13 @@ test('resets shows time only when same day', () => {
   expect(resets(undefined, now)).toBe('')
 })
 
+test('meterSvg is the same width at any percentage', () => {
+  for (const pct of [0, 13, 23, 100]) expect(meterSvg(pct)).toContain('width="100" height="12" viewBox')
+  expect(meterSvg(0)).not.toContain('#FFFFFF')
+  expect(meterSvg(23)).toContain('<rect width="23"')
+  expect(meterSvg(150)).toContain('<rect width="100" height="12" rx="3" fill="#FFFFFF"')
+})
+
 test('left counts down in days, hours and minutes', () => {
   const now = new Date('2026-10-15T12:00:00Z')
   expect(left('2026-10-19T00:30:00Z', now)).toBe('3d 12h left')
@@ -53,7 +60,8 @@ for (const surface of ['terminal', 'desktop'] as const) {
     // One row per window, no separator between them; white bar, gray details.
     const drawn = JSON.stringify(await ui.drawn())
     expect(drawn).not.toContain('   ·   ')
-    expect(drawn).toContain('"color":"text"')
+    if (surface === 'desktop') expect(await ui.find({ type: 'Svg' })).toBeDefined()
+    else expect(drawn).toContain('"color":"text"')
     expect(drawn).toContain('"color":"#B4B4B4"')
 
     await $.session.measure({ context: { window: 200000 } as never, rateLimits: [], changed: ['rateLimits'] })
