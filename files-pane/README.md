@@ -10,15 +10,15 @@ A Claude Code mod that adds a **Files** pane to the desktop app and the terminal
 
 ## Install
 
-`/plugin install` only works in a terminal Claude Code session (not the desktop Code tab), but once installed the pane loads in the desktop app too.
+Run these in any terminal, then restart Claude Code. The pane loads in both the terminal and the desktop app.
 
-In a terminal session:
-
-```
-/plugin install files-pane --marketplace dookers-code/dooks-mods
+```bash
+claude plugin marketplace add dookers-code/dooks-mods
 ```
 
-Answer `y` to add the marketplace, then choose the user scope.
+```bash
+claude plugin install files-pane@dooks-mods
+```
 
 ## Use
 
@@ -37,10 +37,16 @@ It opens the pane if it is closed and closes it if it is open. The pane also ope
 
 ## Update and remove
 
-```
+```bash
 claude plugin marketplace update dooks-mods
-claude plugin update files-pane
-claude plugin uninstall files-pane
+```
+
+```bash
+claude plugin update files-pane@dooks-mods
+```
+
+```bash
+claude plugin uninstall files-pane@dooks-mods
 ```
 
 Restart Claude Code after an update.

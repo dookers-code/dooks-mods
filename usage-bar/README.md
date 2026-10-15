@@ -9,9 +9,17 @@ Weekly   ████░░░░░░  41% 3d 12h left · resets Mon 4:00 AM
 
 ## Install
 
+Run these in any terminal, then restart Claude Code:
+
+```bash
+claude plugin marketplace add dookers-code/dooks-mods
 ```
-/plugin install usage-bar --marketplace dookers-code/dooks-mods
+
+```bash
+claude plugin install usage-bar@dooks-mods
 ```
+
+To update later, run `claude plugin marketplace update dooks-mods`, then `claude plugin update usage-bar@dooks-mods`.
 
 ## Toggle
 
