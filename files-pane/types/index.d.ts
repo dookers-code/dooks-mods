@@ -1,5 +1,6 @@
 export type Touch = { path: string; kind: 'read' | 'edited' }
 export type Current = { tool: string; path: string } | null
+export type Limit = { kind: string; percentUsed: number; resetsAt?: string }
 
 declare module 'claude-code' {
   interface PluginState {
@@ -19,6 +20,7 @@ declare module 'claude-code' {
       branch: string
       changes: number
       tick: number
+      usage: Limit[]
     }
   }
 }

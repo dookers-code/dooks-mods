@@ -1,1 +1,1 @@
-{ "name": "usage-bar", "version": "0.1.0", "description": "Your 5-hour and weekly usage limits in a band above the prompt", "types": "./types/index.d.ts" }
+{ "name": "usage-bar", "version": "0.2.0", "description": "Your 5-hour and weekly usage limits in a band above the prompt", "types": "./types/index.d.ts" }

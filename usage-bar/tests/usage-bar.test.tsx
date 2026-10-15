@@ -30,7 +30,7 @@ test('resets shows time only when same day', () => {
 })
 
 for (const surface of ['terminal', 'desktop'] as const) {
-  test(`draws both windows on ${surface} after a measurement`, async ($, on) => {
+  test(`draws both windows on ${surface} and keeps them through an empty reading`, async ($, on) => {
     on('session.measure', (_$, e) => ({ changed: e.changed }))
     mock.clock(on, { now: Date.parse('2026-10-15T12:00:00Z') })
 
@@ -40,5 +40,28 @@ for (const surface of ['terminal', 'desktop'] as const) {
     expect((await ui.find({ text: '5h' }))).toBeDefined()
     expect((await ui.find({ text: '24%' }))).toBeDefined()
     expect((await ui.find({ text: '41%' }))).toBeDefined()
+
+    await $.session.measure({ context: { window: 200000 } as never, rateLimits: [], changed: ['rateLimits'] })
+    await ui.redraw()
+    expect((await ui.find({ text: '41%' }))).toBeDefined()
+  })
+
+  test(`/usage-bar toggles the band on ${surface}`, async ($, on) => {
+    mock.clock(on, { now: Date.parse('2026-10-15T12:00:00Z') })
+    mock.store(on)
+    on('session.measure', (_$, e) => ({ changed: e.changed }))
+    on('ui.render', { component: 'AbovePrompt' }, ($, e) => {
+      const { Box } = $.ui.resolve(e)
+      return <Box />
+    })
+
+    await $.session.measure({ context: { window: 200000 } as never, rateLimits: LIMITS, changed: ['rateLimits'] })
+    await $.command.run({ command: 'usage-bar', args: '' } as never)
+    const ui = await $.ui.mount({ plugin: 'usage-bar', surface, component: 'AbovePrompt', props: PROPS as never })
+    expect(await ui.find({ text: '41%' })).toBeUndefined()
+
+    await $.command.run({ command: 'usage-bar', args: '' } as never)
+    await ui.redraw()
+    expect(await ui.find({ text: '41%' })).toBeDefined()
   })
 }

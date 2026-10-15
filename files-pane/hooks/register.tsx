@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { Elements, Register } from 'claude-code'
 
-import type { Current, Touch } from '../types'
+import type { Current, Limit, Touch } from '../types'
 
 const PANE = 'files-pane'
 
@@ -20,6 +20,7 @@ const expandA = atom({ plugin: 'files-pane', key: 'expandAll' } as const, false)
 const headA = atom({ plugin: 'files-pane', key: 'head' } as const, '')
 const snapA = atom({ plugin: 'files-pane', key: 'snapshot' } as const, {} as Record<string, string>)
 const tickA = atom({ plugin: 'files-pane', key: 'tick' } as const, 0)
+const usageA = atom({ plugin: 'files-pane', key: 'usage' } as const, [] as Limit[])
 
 const READ = ['Read', 'NotebookRead']
 const EDIT = ['Edit', 'Write', 'MultiEdit', 'NotebookEdit']
@@ -44,6 +45,24 @@ const badge = (name: string): [string, string] => {
 const PURPLE = '#c084fc'
 const ORANGE = '#fb923c'
 const YELLOW = '#facc15'
+const USAGE = '#FF8200'
+
+const LIMIT_LABELS: Record<string, string> = { five_hour: '5h', seven_day: '7d', spend_limit: 'spend' }
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+export const meter = (pct: number) => {
+  const filled = Math.max(0, Math.min(10, Math.round(pct / 10)))
+  return '█'.repeat(filled) + '░'.repeat(10 - filled)
+}
+// Same day shows just the time; later days lead with the weekday.
+export const resets = (iso: string | undefined, now: Date) => {
+  const d = iso ? new Date(iso) : null
+  if (!d || isNaN(d.getTime())) return ''
+  const h = d.getHours()
+  const time = `${h % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`
+  return `resets ${d.toDateString() === now.toDateString() ? '' : DAYS[d.getDay()] + ' '}${time}`
+}
+const pickLimits = (limits: readonly Limit[]): Limit[] =>
+  limits.map(({ kind, percentUsed, resetsAt }) => ({ kind, percentUsed, resetsAt }))
 
 const rel = (cwd: string, p: string) => (p.startsWith(cwd + '/') ? p.slice(cwd.length + 1) : p)
 const base = (p: string) => p.slice(p.lastIndexOf('/') + 1)
@@ -116,7 +135,17 @@ export const register: Register = on => {
     await update($, snapA, () => first)
     void $.ui.open({ id: PANE, title: 'Files' })
     $.clock.every(5000, () => void refreshGit($))
+    const { rateLimits } = await $.session.usage()
+    if (rateLimits.length) await update($, usageA, () => pickLimits(rateLimits))
 
+    return next(e)
+  })
+
+  // A response without rate-limit figures reports an empty list; keep the last reading.
+  on('session.measure', async ($, e, next) => {
+    if (e.changed.includes('rateLimits') && e.rateLimits.length) {
+      await update($, usageA, () => pickLimits(e.rateLimits))
+    }
     return next(e)
   })
 
@@ -130,6 +159,12 @@ export const register: Register = on => {
     await $.ui.open({ id: PANE, title: 'Files' })
 
     return { text: 'Files pane opened.' }
+  })
+
+  // Claude touched covers the latest prompt only: start it over each time one is sent.
+  on('prompt.submit', async ($, e, next) => {
+    await update($, touchedA, () => [])
+    return next(e)
   })
 
   on('tool.call', async ($, e, next) => {
@@ -188,6 +223,8 @@ export const register: Register = on => {
     const preview = await read($, previewA)
     const showDiff = await read($, diffA)
     const expandAll = await read($, expandA)
+    const usage = await read($, usageA)
+    const now = new Date(await $.clock.now())
     await read($, tickA)
 
     const SLOT = 24
@@ -432,6 +469,17 @@ export const register: Register = on => {
             <Text bold>{liveBranch || branch || 'no git'}</Text>
             <Text dimColor>{'  '}{changed.length ? `${changed.length} uncommitted` : 'clean, nothing changed'}</Text>
           </Text>
+          {usage.length > 0 && (
+            <Box flexDirection="column">
+              {usage.map(l => (
+                <Text key={`u-${l.kind}`}>
+                  <Text bold color={USAGE}>{(LIMIT_LABELS[l.kind] ?? l.kind).padEnd(3, '\u00a0')}</Text>
+                  <Text color={USAGE}>{`${meter(l.percentUsed)} ${Math.round(l.percentUsed)}%`}</Text>
+                  <Text color={USAGE} dimColor>{l.resetsAt ? '  ' + resets(l.resetsAt, now) : ''}</Text>
+                </Text>
+              ))}
+            </Box>
+          )}
           <Text>
             <Text color={PURPLE}>● </Text><Text>Claude read  </Text>
             <Text color={ORANGE}>● </Text><Text>Claude edited  </Text>
@@ -441,10 +489,10 @@ export const register: Register = on => {
 
         <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
           <Box justifyContent="space-between">
-            <Text bold dimColor>CLAUDE TOUCHED</Text>
+            <Text bold dimColor>CLAUDE TOUCHED · LAST PROMPT</Text>
             <Text bold dimColor>{touched.length} {touched.length === 1 ? 'FILE' : 'FILES'}</Text>
           </Box>
-          {touched.length === 0 && <Text dimColor>Nothing yet.</Text>}
+          {touched.length === 0 && <Text dimColor>Nothing touched for this prompt yet.</Text>}
           {touchedRows as never}
         </Box>
 

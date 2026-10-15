@@ -30,8 +30,8 @@ Toggle the pane with:
 
 It opens the pane if it is closed and closes it if it is open. The pane also opens on its own at session start (the terminal only draws it from 144 columns wide).
 
-- **Status card**: what Claude is reading or editing right now, the branch, and the uncommitted count.
-- **Claude touched**: files Claude read (Opened) or changed (Edited). Click a name to preview it.
+- **Status card**: what Claude is reading or editing right now, the branch, the uncommitted count, and your 5-hour and weekly usage limits in orange with their reset times. Usage needs a Claude subscription and appears after the first reply in a session.
+- **Claude touched**: files Claude read (Opened) or changed (Edited) for your latest prompt. It starts over each time you send one. Click a name to preview it.
 - **Git changes**: every uncommitted file with `+N -M` counts, a total, and an inline diff. Use *Expand all diffs* to see the whole `git diff`.
 - **All files**: a tree with file-type icons, search, size and hidden-file toggles. Click a name to preview a file; a changed file opens as a diff with a Changes / File toggle.
 
@@ -48,7 +48,7 @@ Restart Claude Code after an update.
 ## Known limits
 
 - The file tree is capped at 120 rows (and previews at 120 lines). The desktop silently drops a pane whose tree is too large, so collapse folders or search to see more.
-- **Claude touched** only sees changes made while the mod is loaded, and it resets when the mod reloads.
+- **Claude touched** only sees changes made while the mod is loaded, and it resets when the mod reloads or you send a new prompt.
 - Edits made by shell commands are detected by comparing `git status` before and after each tool call. A change you make yourself during a tool call can be wrongly credited to Claude. Files only *read* through a shell command are not tracked.
 - Git views compare against `HEAD`, so they also include changes made before the session started.
 
