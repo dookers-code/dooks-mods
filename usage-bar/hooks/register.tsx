@@ -5,9 +5,10 @@ import type { Limit } from '../types'
 
 const limitsA = atom({ plugin: 'usage-bar', key: 'limits' } as const, [] as Limit[])
 const hiddenA = atom({ plugin: 'usage-bar', key: 'isHidden' } as const, false)
+const tickA = atom({ plugin: 'usage-bar', key: 'tick' } as const, 0)
 
 const ORANGE = '#FF8200'
-const LABELS: Record<string, string> = { five_hour: '5h', seven_day: '7d', spend_limit: 'spend' }
+const LABELS: Record<string, string> = { five_hour: 'Session', seven_day: 'Weekly', spend_limit: 'Spend' }
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WIDTH = 10
 
@@ -31,6 +32,17 @@ export const resets = (iso: string | undefined, now: Date) => {
   return `resets ${sameDay ? '' : DAYS[d.getDay()] + ' '}${clock(d)}`
 }
 
+// Time until the window resets: "3d 12h", "2h 13m" or "45m".
+export const left = (iso: string | undefined, now: Date) => {
+  const at = iso ? new Date(iso).getTime() : NaN
+  if (isNaN(at)) return ''
+  const mins = Math.max(0, Math.ceil((at - now.getTime()) / 60000))
+  const d = Math.floor(mins / 1440)
+  const h = Math.floor((mins % 1440) / 60)
+  const m = mins % 60
+  return `${d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`} left`
+}
+
 const pick = (limits: readonly Limit[]): Limit[] =>
   limits.map(({ kind, percentUsed, resetsAt }) => ({ kind, percentUsed, resetsAt }))
 
@@ -42,6 +54,8 @@ export const register: Register = on => {
     await update($, hiddenA, () => isHidden)
     const { rateLimits } = await $.session.usage()
     if (rateLimits.length) await update($, limitsA, () => pick(rateLimits))
+    // Redraw each minute so the time left counts down.
+    $.clock.every(60000, () => void update($, tickA, n => n + 1))
     return result
   })
 
@@ -62,6 +76,7 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const isHidden = await read($, hiddenA)
+    await read($, tickA)
     let limits = await read($, limitsA)
     if (!limits.length) limits = pick((await $.session.usage()).rateLimits)
     if (e.props.hasSurvey || isHidden) return next(e)
@@ -79,7 +94,7 @@ export const register: Register = on => {
             {i > 0 ? <Text color={ORANGE}>{'   ·   '}</Text> : null}
             <Text color={ORANGE} bold>{LABELS[l.kind] ?? l.kind} </Text>
             <Text color={ORANGE}>{bar(l.percentUsed)} {Math.round(l.percentUsed)}%</Text>
-            <Text color={ORANGE} dimColor>{l.resetsAt ? '  ' + resets(l.resetsAt, now) : ''}</Text>
+            <Text color={ORANGE} dimColor>{l.resetsAt ? `  ${left(l.resetsAt, now)} · ${resets(l.resetsAt, now)}` : ''}</Text>
           </Box>
         ))}
       </Box>

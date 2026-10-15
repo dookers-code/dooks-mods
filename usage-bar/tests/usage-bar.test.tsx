@@ -1,6 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 
-import { bar, resets } from '../hooks/register'
+import { bar, left, resets } from '../hooks/register'
 
 const PROPS = {
   hasSurvey: false,
@@ -29,6 +29,15 @@ test('resets shows time only when same day', () => {
   expect(resets(undefined, now)).toBe('')
 })
 
+test('left counts down in days, hours and minutes', () => {
+  const now = new Date('2026-10-15T12:00:00Z')
+  expect(left('2026-10-19T00:30:00Z', now)).toBe('3d 12h left')
+  expect(left('2026-10-15T14:13:00Z', now)).toBe('2h 13m left')
+  expect(left('2026-10-15T12:45:00Z', now)).toBe('45m left')
+  expect(left('2026-10-15T11:00:00Z', now)).toBe('0m left')
+  expect(left(undefined, now)).toBe('')
+})
+
 for (const surface of ['terminal', 'desktop'] as const) {
   test(`draws both windows on ${surface} and keeps them through an empty reading`, async ($, on) => {
     on('session.measure', (_$, e) => ({ changed: e.changed }))
@@ -37,7 +46,8 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await $.session.measure({ context: { window: 200000 } as never, rateLimits: LIMITS, changed: ['rateLimits'] })
     const ui = await $.ui.mount({ plugin: 'usage-bar', surface, component: 'AbovePrompt', props: PROPS as never })
 
-    expect((await ui.find({ text: '5h' }))).toBeDefined()
+    expect((await ui.find({ text: 'Weekly' }))).toBeDefined()
+    expect((await ui.find({ text: '4d 2h left' }))).toBeDefined()
     expect((await ui.find({ text: '24%' }))).toBeDefined()
     expect((await ui.find({ text: '41%' }))).toBeDefined()
 

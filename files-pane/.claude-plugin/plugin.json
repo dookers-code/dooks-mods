@@ -1,1 +1,1 @@
-{ "name": "files-pane", "version": "0.3.0", "description": "Files pane with file-type badges, a Claude touched list, live activity and git state", "types": "./types/index.d.ts" }
+{ "name": "files-pane", "version": "0.4.0", "description": "Files pane with file-type badges, a Claude touched list, live activity and git state", "types": "./types/index.d.ts" }
